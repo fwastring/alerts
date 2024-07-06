@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	// badger "github.com/dgraph-io/badger/v4"
-	"github.com/fwastring/alerts/database"
+	db "github.com/fwastring/alerts/database"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,20 +16,29 @@ type Alert struct {
     Instance  string  `json:"instance"`
 }
 
+func resolveAlert(c *gin.Context) {
+	name := c.Param("name")
+
+	err := db.Delete(name)
+	if err != nil {
+		log.Fatalf("error: %v\n", err)
+	}
+	c.IndentedJSON(http.StatusOK, nil)
+}
+
 
 func getAlerts(c *gin.Context) {
-	alerts, err := getAll()
+	alerts, err := db.GetAll()
 	if err != nil {
 		log.Fatalf("error: %v\n", err)
 	}
 	c.IndentedJSON(http.StatusOK, alerts)
-
 }
 
 func getAlertByName(c *gin.Context) {
     name := c.Param("name")
 
-	alert, err := get(name)
+	alert, err := db.Get(name)
 	if err != nil {
 		log.Fatalf("error: %v\n", err)
 		c.IndentedJSON(http.StatusNotFound, nil)
@@ -43,7 +52,7 @@ func postAlert(c *gin.Context) {
     if err := c.BindJSON(&newAlert); err != nil {
         return
     }
-	err := set(newAlert.Name, newAlert.Instance)
+	err := db.Set(newAlert.Name, newAlert.Instance)
 	if err != nil {
 		log.Fatalf("error: %v\n", err)
 	}
@@ -52,13 +61,11 @@ func postAlert(c *gin.Context) {
 }
 
 func main() {
-	if err != nil {
-		log.Fatal(err)
-	}
 	router := gin.Default()
     router.GET("/alerts", getAlerts)
 	router.GET("/alerts/:name", getAlertByName)
     router.POST("/alerts", postAlert)
+	router.DELETE("/alerts/:name", resolveAlert)
 
     router.Run("localhost:8080")
 }
