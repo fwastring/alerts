@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	// badger "github.com/dgraph-io/badger/v4"
-	// "fwastring/database"
+	"github.com/fwastring/alerts/database"
 	"github.com/gin-gonic/gin"
 )
 

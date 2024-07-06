@@ -12,7 +12,7 @@ type Alert struct {
     Instance  string  `json:"instance"`
 }
 
-func getAll() ([]Alert, error) {
+func GetAll() ([]Alert, error) {
 	var alerts []Alert
 	err := db.View(func(txn *badger.Txn) error {
 	  opts := badger.DefaultIteratorOptions
@@ -41,7 +41,7 @@ func getAll() ([]Alert, error) {
 var db, err = badger.Open(badger.DefaultOptions("/tmp/badger"))
 
 
-func close() error {
+func Close() error {
  return db.Close()
 }
 
@@ -63,7 +63,7 @@ func exists(key string) (bool, error) {
  return exists, err
 }
 
-func get(key string) (string, error) {
+func Get(key string) (string, error) {
  var value string
  return value, db.View(
   func(tx *badger.Txn) error {
@@ -80,14 +80,14 @@ func get(key string) (string, error) {
   })
 }
 
-func set(key, value string) error {
+func Set(key, value string) error {
  return db.Update(
   func(txn *badger.Txn) error {
    return txn.Set([]byte(key), []byte(value))
   })
 }
 
-func delete(key string) error {
+func Delete(key string) error {
  return db.Update(
   func(txn *badger.Txn) error {
    return txn.Delete([]byte(key))
